@@ -1,100 +1,40 @@
-const { validationResult } = require('express-validator')
-const knex = require('../../config/database/index')
-
-// const users = [
-//   {
-//     id: 1,
-//     name: "Leanne Graham",
-//     username: "Bret",
-//     email: "Sincere@april.biz",
-//     password: "123",
-//     address: {
-//       street: "Kulas Light",
-//       suite: "Apt. 556",
-//       city: "Gwenborough",
-//       zipcode: "92998-3874",
-//       geo: {
-//         lat: "-37.3159",
-//         lng: "81.1496",
-//       },
-//     },
-//     phone: "1-770-736-8031 x56442",
-//     website: "hildegard.org",
-//     company: {
-//       name: "Romaguera-Crona",
-//       catchPhrase: "Multi-layered client-server neural-net",
-//       bs: "harness real-time e-markets",
-//     },
-//   },
-//   {
-//     id: 2,
-//     name: "Ervin Howell",
-//     username: "Antonette",
-//     email: "Shanna@melissa.tv",
-//     password: "123",
-//     address: {
-//       street: "Victor Plains",
-//       suite: "Suite 879",
-//       city: "Wisokyburgh",
-//       zipcode: "90566-7771",
-//       geo: {
-//         lat: "-43.9509",
-//         lng: "-34.4618",
-//       },
-//     },
-//     phone: "010-692-6593 x09125",
-//     website: "anastasia.net",
-//     company: {
-//       name: "Deckow-Crist",
-//       catchPhrase: "Proactive didactic contingency",
-//       bs: "synergize scalable supply-chains",
-//     },
-//   },
-// ];
-
-// const signinArr = [];
+const { validationResult } = require("express-validator");
+const knex = require("../../config/database/index");
+const config = require("../../config/environment/config");
+var jwt = require("jsonwebtoken");
 
 async function login(req, res) {
-    // const { email, password } = req.body;
-    // if (!email || !password) {
-    //   return res.status(400).send("Credentials invalid");
-    // }
-    // const user = users.find((item) => item.email === email);
-    // if (!user) {
-    //   return res.status(400).send("User not found");
-    // }
-    // if (user.password !== password) {
-    //   return res.status(400).send("Wrong password");
-    // }
-    // return res.status(200).send(user);
+  try {
+    const errors = validationResult(req);
 
-    try {
-        const errors = validationResult(req)
-
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() })
-        }
-
-        const value = req.body
-
-        const user = await knex('admins')
-            .where({
-                ad_email: value.ad_email,
-            })
-            .select('*')
-            .first()
-        // const user = users.find((item) => item.email === email);
-        if (!user) {
-            return res.status(400).send('User not found')
-        }
-        if (user.ad_password !== value.ad_password) {
-            return res.status(400).send('Invalid password')
-        }
-
-        return res.status(200).json({ message: 'User logged in successfully!' })
-    } catch (err) {
-        console.log('Error in login', err)
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
     }
+
+    const value = req.body;
+
+    const user = await knex("admins")
+      .where({
+        ad_email: value.ad_email,
+      })
+      .select("*")
+      .first();
+
+    if (!user) {
+      return res.status(400).send("User not found");
+    }
+    if (user.ad_password !== value.ad_password) {
+      return res.status(400).send("Invalid password");
+    }
+
+    var token = jwt.sign(user, config.jwt_key);
+
+    return res
+      .status(200)
+      .json({ message: "User logged in successfully!", token });
+  } catch (err) {
+    console.log("Error in login", err);
+  }
 }
 
 async function signUp(req, res) {
@@ -141,4 +81,15 @@ async function signUp(req, res) {
     }
 }
 
-module.exports = { login, signUp }
+async function getAdmins(req, res) {
+  console.log("Inside getAdmin request");
+
+  const adminResponse = await knex.select("*").from("admins");
+  console.log("Admin response=", adminResponse);
+
+  res.status(200).send("Got admin details");
+}
+
+async function updateAdmin(req, res) {}
+
+module.exports = { login, signUp, getAdmins, updateAdmin };
