@@ -27,4 +27,8 @@ router.post(
   controller.signUp
 );
 
+router.get("/getAdmins",controller.getAdmins);
+
+router.put("/updateAdmin",controller.updateAdmin)
+
 module.exports = router;

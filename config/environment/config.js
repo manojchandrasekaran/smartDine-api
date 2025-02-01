@@ -13,6 +13,7 @@ const config = {
     },
     pool: { min: 0, max: 7 },
   },
+  jwt_key: process.env.SECRET_KEY,
 };
 
 module.exports = config;
