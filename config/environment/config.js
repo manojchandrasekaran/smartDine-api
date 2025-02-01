@@ -1,19 +1,20 @@
-const dotenv = require("dotenv");
-dotenv.config();
+const dotenv = require('dotenv')
+dotenv.config()
 
 const config = {
-  knex: {
-    client: "mysql2",
-    connection: {
-      host: process.env.DB_HOST,
-      port: 3306,
-      user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME,
+    knex: {
+        client: 'mysql2',
+        connection: {
+            host: process.env.DB_HOST,
+            port: 3306,
+            user: process.env.DB_USER,
+            password: process.env.DB_PASSWORD,
+            database: process.env.DB_NAME,
+        },
+        pool: { min: 0, max: 7 },
     },
-    pool: { min: 0, max: 7 },
-  },
   jwt_key: process.env.SECRET_KEY,
 };
 
-module.exports = config;
+
+module.exports = config
