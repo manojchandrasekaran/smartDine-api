@@ -1,47 +1,78 @@
-var createError = require('http-errors')
-var express = require('express')
-var path = require('path')
-var cookieParser = require('cookie-parser')
-var logger = require('morgan')
-var cors = require('cors')
+import { fileURLToPath } from 'url';
+import express from 'express';
+import path from 'path';
+import cookieParser from 'cookie-parser';
+import bodyParser from 'body-parser';
+import logger from 'morgan';
+import dotenv from 'dotenv';
+import cors from 'cors';
+import authFactory from './routes/auth/auth.service.js';
 
-var indexRouter = require('./routes/index')
-var usersRouter = require('./routes/users')
-var authRouter = require('./routes/auth/index')
+import initializeRoutes from './routes.js';
 
-var app = express()
+dotenv.config();
+const auth = authFactory();
+
+
+const app = express();
+
+const __filename = fileURLToPath(import.meta.url);
+
+// Get the current directory's path
+const __dirname = path.dirname(__filename);
 
 // view engine setup
-app.set('views', path.join(__dirname, 'views'))
-app.set('view engine', 'pug')
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'pug');
 
-app.use(cors('*'))
-app.use(logger('dev'))
-app.use(express.json())
-app.use(express.urlencoded({ extended: false }))
-app.use(cookieParser())
-app.use(express.static(path.join(__dirname, 'public')))
+const allowedOrigins = [
+  'http://localhost:3000',
+];
 
-app.use('/', indexRouter)
-app.use('/users', usersRouter)
-app.use('/auth', authRouter)
+app.use(cors({ origin: '*', credentials: true }));
+app.options('/', cors({ origin: allowedOrigins, credentials: true }));
+
+app.use(auth.initialize());
+app.use(logger('dev'));
+app.use(express.json());
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+
+// parse various different custom JSON types as JSON
+app.use(bodyParser.json({ type: 'application/*+json' }));
+app.use(bodyParser.raw({ type: 'application/vnd.custom-type' }));
+
+// parse an HTML body into a string
+app.use(bodyParser.text({ type: 'text/html' }));
+
+app.use(cookieParser(process.env.SECRET_KEY));
+
+app.use(express.static(path.join(__dirname, 'public')));
+
+
+initializeRoutes(app);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
-    next(createError(404))
-})
+  const err = new Error('Not Found');
+  err.status = 404;
+  next(err);
+});
 
 // error handler
-app.use(function (err, req, res, next) {
-    // console.log("test");
+app.use(function (err, req, res) {
+  console.log('Error:', err);
 
-    // set locals, only providing error in development
-    res.locals.message = err.message
-    res.locals.error = req.app.get('env') === 'development' ? err : {}
+  // set locals, only providing error in development
+  res.locals.message = err.message;
+  res.locals.error = req.app.get('env') === 'development' ? err : {};
 
-    // render the error page
-    res.status(err.status || 500)
-    res.render('error')
-})
+  // return the error as JSON
+  res.status(err.status || 500).json({
+    code: err.status || 500,
+    message: err.message || 'Internal Server Error'
+  });
+});
 
-module.exports = app
+export default app;
