@@ -2,6 +2,7 @@ import express from 'express';
 
 import controller from './auth.controller.js';
 import { body } from 'express-validator';
+import authService from './auth.service.js';
 
 const router = express.Router();
 
@@ -34,7 +35,7 @@ router.post(
   ],
   controller.signUp
 );
-
+router.get('/getme', authService().authenticate(), controller.getMe);
 router.get('/getAdmins',controller.getAdmins);
 
 router.put('/updateAdmin',controller.updateAdmin);

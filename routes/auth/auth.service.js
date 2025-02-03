@@ -22,8 +22,7 @@ jwtOptions.secretOrKey = config.SECRET_KEY;
 
 export default () => {
   const strategy = new JwtStrategy(jwtOptions, async (jwt_payload, next) => {
-    console.log(jwt_payload);
-    const ad_id = jwt_payload.ad_id;
+    const ad_id = jwt_payload.id;
     let user;
     try {
       user = await knex('admins')

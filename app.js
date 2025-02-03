@@ -29,7 +29,7 @@ const allowedOrigins = [
   'http://localhost:3000',
 ];
 
-app.use(cors({ origin: '*', credentials: true }));
+app.use(cors({ origin: allowedOrigins, credentials: true }));
 app.options('/', cors({ origin: allowedOrigins, credentials: true }));
 
 app.use(auth.initialize());
@@ -55,7 +55,7 @@ initializeRoutes(app);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
-  const err = new Error('Not Found');
+  const err = new Error('404 - Not Found');
   err.status = 404;
   next(err);
 });

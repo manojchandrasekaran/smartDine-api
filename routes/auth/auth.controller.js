@@ -105,6 +105,11 @@ async function getAdmins(req, res) {
   res.status(200).send('Got admin details');
 }
 
+async function getMe(req, res) {
+  const { user } = req;
+  return res.status(200).send(user);
+}
+
 async function updateAdmin(req, res) {}
 
-export default { login, signUp, getAdmins, updateAdmin };
+export default { login, signUp,getMe, getAdmins, updateAdmin };
